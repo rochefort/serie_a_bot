@@ -23,13 +23,15 @@ class SerieABot
 
   def crawl
     rss = RSS::Parser.parse('http://www.goal.com/jp/feeds/news?fmt=rss&ICID=OP')
-    sql = 'REPLACE INTO rss_items(title, pub_date, description, link) VALUES(?, ?, ?, ?)'
+    sql = 'REPLACE INTO rss_items(title, pub_date, description, link, tweeted_date) ' +
+          'VALUES(?, ?, ?, ?, (SELECT tweeted_date FROM rss_items WHERE title = ? AND pub_date = ?))'
     @db.transaction do
       rss.items.each do |item|
         title = item.title
+        pub_date = ymdhms(item.date)
         description = Sanitize.clean(item.description).strip
         if about_serie_a?(title, description)
-          @db.execute(sql, title, ymdhms(item.date), description, item.link)
+          @db.execute(sql, title, pub_date, description, item.link, title, pub_date)
         else
           if DEBUG
             puts "----"
