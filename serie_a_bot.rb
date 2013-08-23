@@ -35,9 +35,11 @@ class SerieABot
     upd_sql = 'UPDATE rss_items SET tweeted_date = ? where title = ? AND pub_date = ?'
     @db.execute(sel_sql) do |row|
       title = row[0]
+      pub_date = row[1]
+      description = Sanitize.clean(row[2]).strip
       link = URI.decode(row[3])
-      Twitter.update("#{title}\n#{url_shortner(link)}")
-      @db.execute(upd_sql, ymdhms(Time.now), row[0], row[1])
+      Twitter.update("#{title}\n#{description}\n#{url_shortner(link)}")
+      @db.execute(upd_sql, ymdhms(Time.now), title, pub_date)
     end
   end
 
