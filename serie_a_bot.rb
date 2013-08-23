@@ -59,7 +59,7 @@ class SerieABot
         :body => { :longUrl => url }.to_json,
         :headers => { 'Content-Type' => 'application/json' } )
 
-      (res.code == 200) ? res["id"] : ''
+      (res.code == 200) ? res["id"] : url
     end
 end
 
