@@ -26,7 +26,7 @@ namespace :db do
 end
 
 namespace :debug do
-  desc 'tweeted_dateを初期化する'
+  desc 'debug用にtweeted_dateを初期化する'
   task :init_tweeted_date do
     sql = 'UPDATE rss_items SET tweeted_date = null'
     db = SQLite3::Database.new(DB_FILE)
