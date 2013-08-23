@@ -8,6 +8,7 @@ require 'sqlite3'
 require 'twitter'
 
 class SerieABot
+  DEBUG = false
 
   def initialize
     @db = SQLite3::Database.new('serie_a_bot.db')
@@ -25,7 +26,17 @@ class SerieABot
     sql = 'REPLACE INTO rss_items(title, pub_date, description, link) VALUES(?, ?, ?, ?)'
     @db.transaction do
       rss.items.each do |item|
-        @db.execute(sql, item.title, ymdhms(item.date), item.description, item.link)
+        title = item.title
+        description = Sanitize.clean(item.description).strip
+        if about_serie_a?(title, description)
+          @db.execute(sql, title, ymdhms(item.date), description, item.link)
+        else
+          if DEBUG
+            puts "----"
+            puts title
+            puts description
+          end
+        end
       end
     end
   end
@@ -36,7 +47,7 @@ class SerieABot
     @db.execute(sel_sql) do |row|
       title = row[0]
       pub_date = row[1]
-      description = Sanitize.clean(row[2]).strip
+      description = row[2]
       link = URI.decode(row[3])
       Twitter.update("#{title}\n#{description}\n#{url_shortner(link)}")
       @db.execute(upd_sql, ymdhms(Time.now), title, pub_date)
@@ -46,6 +57,12 @@ class SerieABot
   private
     def ymdhms(time)
       time.strftime("%Y-%m-%d %H:%M:%S")
+    end
+
+    def about_serie_a?(*words)
+      File.open('whitelist.txt').readlines.map(&:strip).any? do |keyword|
+        words.join.include?(keyword)
+      end
     end
 
     # Google API Shortner response:
