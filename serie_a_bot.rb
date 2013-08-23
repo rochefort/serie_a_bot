@@ -46,13 +46,20 @@ class SerieABot
   def tweet
     sel_sql = 'SELECT title, pub_date, description, link FROM rss_items WHERE tweeted_date is null ORDER BY pub_date, title LIMIT 1'
     upd_sql = 'UPDATE rss_items SET tweeted_date = ? where title = ? AND pub_date = ?'
+
     @db.execute(sel_sql) do |row|
-      title = row[0]
-      pub_date = row[1]
-      description = row[2]
-      link = URI.decode(row[3])
-      Twitter.update("#{title}\n#{description}\n#{url_shortner(link)}")
-      @db.execute(upd_sql, ymdhms(Time.now), title, pub_date)
+      begin
+        title = row[0]
+        pub_date = row[1]
+        description = row[2]
+        link = URI.decode(row[3])
+        Twitter.update("#{title}\n#{description}\n#{url_shortner(link)}")
+        @db.execute(upd_sql, ymdhms(Time.now), title, pub_date)
+      rescue Twitter::Error::Forbidden => e
+        @db.execute(upd_sql, ymdhms(Time.now), title, pub_date)
+      rescue
+        # do nothing
+      end
     end
   end
 
