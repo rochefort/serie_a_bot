@@ -8,7 +8,7 @@ require 'sanitize'
 require 'twitter'
 
 class SerieABot
-  DEBUG = true
+  DEBUG = false
 
   def initialize
     yaml = YAML.load_file('config/settings.yaml')
