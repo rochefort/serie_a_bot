@@ -5,7 +5,6 @@ require 'rss'
 require 'httparty'
 require 'json'
 require 'sanitize'
-require 'sqlite3'
 require 'twitter'
 
 class SerieABot
