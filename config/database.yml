@@ -1,2 +1,2 @@
 adapter: sqlite3
-database: serie_a_bot.db
+database: db/serie_a_bot.db

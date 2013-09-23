@@ -21,8 +21,7 @@ class SerieABot
   DEBUG = false
 
   def initialize
-    p RssItem.all
-    yaml = YAML.load_file('settings.yaml')
+    yaml = YAML.load_file('config/settings.yaml')
     Twitter.configure do |config|
       config.consumer_key = yaml['twitter']['consumer_key']
       config.consumer_secret = yaml['twitter']['consumer_secret']
@@ -78,7 +77,7 @@ class SerieABot
     end
 
     def about_serie_a?(*words)
-      File.open('whitelist.txt').readlines.map(&:strip).any? do |keyword|
+      File.open('config/whitelist.txt').readlines.map(&:strip).any? do |keyword|
         words.join.include?(keyword)
       end
     end
