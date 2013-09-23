@@ -1,17 +1,27 @@
 #!/usr/bin/env ruby
 require 'rss'
 
+require 'active_record'
 require 'httparty'
 require 'json'
 require 'sanitize'
 require 'sqlite3'
 require 'twitter'
 
+class BaseModel < ActiveRecord::Base
+  self.abstract_class = true
+  db_config = YAML.load_file('config/database.yml').symbolize_keys
+  ActiveRecord::Base.establish_connection(db_config)
+end
+
+class RssItem < BaseModel
+end
+
 class SerieABot
   DEBUG = false
 
   def initialize
-    @db = SQLite3::Database.new('serie_a_bot.db')
+    p RssItem.all
     yaml = YAML.load_file('settings.yaml')
     Twitter.configure do |config|
       config.consumer_key = yaml['twitter']['consumer_key']
@@ -25,13 +35,17 @@ class SerieABot
     rss = RSS::Parser.parse('http://www.goal.com/jp/feeds/news?fmt=rss&ICID=OP')
     sql = 'REPLACE INTO rss_items(title, pub_date, description, link, tweeted_date) ' +
           'VALUES(?, ?, ?, ?, (SELECT tweeted_date FROM rss_items WHERE title = ? AND pub_date = ?))'
-    @db.transaction do
+
+    RssItem.transaction do
       rss.items.each do |item|
         title = item.title
         pub_date = ymdhms(item.date)
         description = Sanitize.clean(item.description).strip
         if about_serie_a?(title, description)
-          @db.execute(sql, title, pub_date, description, item.link, title, pub_date)
+          st = RssItem.connection.raw_connection.prepare(sql)
+          st.execute(title, pub_date, description, item.link, title, pub_date)
+          st.close
+          puts title if DEBUG
         else
           if DEBUG
             puts "----"
@@ -44,21 +58,16 @@ class SerieABot
   end
 
   def tweet
-    sel_sql = 'SELECT title, pub_date, description, link FROM rss_items WHERE tweeted_date is null ORDER BY pub_date, title LIMIT 1'
-    upd_sql = 'UPDATE rss_items SET tweeted_date = ? where title = ? AND pub_date = ?'
-
-    @db.execute(sel_sql) do |row|
+    RssItem.where(tweeted_date: nil).order('pub_date, title').limit(1).first.tap do |r|
       begin
-        title = row[0]
-        pub_date = row[1]
-        description = row[2]
-        link = URI.decode(row[3])
-        Twitter.update("#{title}\n#{description}\n#{url_shortner(link)}")
-        @db.execute(upd_sql, ymdhms(Time.now), title, pub_date)
+        Twitter.update("#{r.title}\n#{r.description}\n#{url_shortner(r.link)}")
+        r.update_attributes(tweeted_date: ymdhms(Time.now), title: r.title, pub_date: r.pub_date)
       rescue Twitter::Error::Forbidden => e
-        @db.execute(upd_sql, ymdhms(Time.now), title, pub_date)
-      rescue
+        # Tweet二重登録時には、DBの更新だけ行う
+        r.update_attributes(tweeted_date: ymdhms(Time.now), title: r.title, pub_date: r.pub_date)
+      rescue => e
         # do nothing
+        p e if DEBUG
       end
     end
   end
