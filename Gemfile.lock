@@ -36,7 +36,6 @@ GEM
     sanitize (2.0.6)
       nokogiri (>= 1.4.4)
     simple_oauth (0.2.0)
-    sqlite3 (1.3.8)
     thread_safe (0.1.3)
       atomic
     twitter (4.8.1)
@@ -53,5 +52,4 @@ DEPENDENCIES
   httparty
   json
   sanitize
-  sqlite3
   twitter
