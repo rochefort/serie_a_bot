@@ -1,35 +1,30 @@
-require 'sqlite3'
-
-DB_FILE = 'serie_a_bot.db'
+require './model'
 
 namespace :db do
   desc 'データベース、テーブルを作成します'
   task :create do
-    db = SQLite3::Database.new(DB_FILE)
-    sql = <<-SQL
-      CREATE TABLE rss_items (
-        title varchar2,
-        pub_date text,
-        description varchar2,
-        link varchar2,
-        tweeted_date text,
-        PRIMARY KEY(title, pub_date)
-      );
-    SQL
-    db.execute(sql)
+    ActiveRecord::Migration.create_table :rss_items do |t|
+      t.string :title
+      t.datetime :pub_date
+      t.string :description
+      t.string :link
+      t.datetime :tweeted_date
+      t.timestamps
+    end
+    ActiveRecord::Migration.add_index(:rss_items, [:title, :pub_date], unique:true)
   end
 
   desc 'データベースを削除します'
   task :drop do
-    File.unlink(DB_FILE)
+    File.unlink(ActiveRecord::Base.connection_config[:database])
   end
 end
 
 namespace :debug do
   desc 'debug用にtweeted_dateを初期化する'
   task :init_tweeted_date do
-    sql = 'UPDATE rss_items SET tweeted_date = null'
-    db = SQLite3::Database.new(DB_FILE)
-    db.execute(sql)
+    RssItems.all.each do |r|
+      r.update_attributes!(tweeted_date: nil)
+    end
   end
 end
