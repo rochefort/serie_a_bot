@@ -8,7 +8,7 @@ require 'sanitize'
 require 'twitter'
 
 class SerieABot
-  DEBUG = false
+  DEBUG = true
 
   def initialize
     yaml = YAML.load_file('config/settings.yaml')
@@ -21,9 +21,10 @@ class SerieABot
   end
 
   def crawl
-    rss = RSS::Parser.parse('http://www.goal.com/jp/feeds/news?fmt=rss&ICID=OP')
-    sql = 'REPLACE INTO rss_items(title, pub_date, description, link, tweeted_date) ' +
-          'VALUES(?, ?, ?, ?, (SELECT tweeted_date FROM rss_items WHERE title = ? AND pub_date = ?))'
+    site = RssSite.first
+    rss = RSS::Parser.parse(site.url)
+    sql = 'REPLACE INTO rss_items(title, pub_date, description, link, tweeted_date, rss_site_id) ' +
+          'VALUES(?, ?, ?, ?, (SELECT tweeted_date FROM rss_items WHERE title = ? AND pub_date = ?), ?)'
 
     RssItem.transaction do
       rss.items.each do |item|
@@ -32,7 +33,7 @@ class SerieABot
         description = Sanitize.clean(item.description).strip
         if about_serie_a?(title, description)
           st = RssItem.connection.raw_connection.prepare(sql)
-          st.execute(title, pub_date, description, item.link, title, pub_date)
+          st.execute(title, pub_date, description, item.link, title, pub_date, site.id)
           st.close
           puts title if DEBUG
         else
@@ -49,7 +50,7 @@ class SerieABot
   def tweet
     RssItem.where(tweeted_date: nil).order('pub_date, title').limit(1).first.tap do |r|
       begin
-        Twitter.update("#{r.title}\n#{r.description}\n#{url_shortner(r.link)}")
+        Twitter.update("[#{r.rss_site.title}]#{r.title}\n#{r.description}\n#{url_shortner(r.link)}")
         r.update_attributes(tweeted_date: ymdhms(Time.now), title: r.title, pub_date: r.pub_date)
       rescue Twitter::Error::Forbidden => e
         # Tweet二重登録時には、DBの更新だけ行う
