@@ -11,12 +11,12 @@ class SerieABot
   DEBUG = false
 
   def initialize
-    yaml = YAML.load_file('config/settings.yaml')
+    settings = YAML.load_file('config/settings.yaml')
     Twitter.configure do |c|
-      c.consumer_key       = yaml['twitter']['consumer_key']
-      c.consumer_secret    = yaml['twitter']['consumer_secret']
-      c.oauth_token        = yaml['twitter']['oauth_token']
-      c.oauth_token_secret = yaml['twitter']['oauth_token_secret']
+      c.consumer_key       = settings['twitter']['consumer_key']
+      c.consumer_secret    = settings['twitter']['consumer_secret']
+      c.oauth_token        = settings['twitter']['oauth_token']
+      c.oauth_token_secret = settings['twitter']['oauth_token_secret']
     end
   end
 
