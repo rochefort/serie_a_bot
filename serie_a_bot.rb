@@ -11,7 +11,7 @@ class SerieABot
   DEBUG = false
 
   def initialize
-    settings = YAML.load_file('config/settings.yaml')
+    settings = YAML.load_file('config/settings.yml')
     Twitter.configure do |c|
       c.consumer_key       = settings['twitter']['consumer_key']
       c.consumer_secret    = settings['twitter']['consumer_secret']
