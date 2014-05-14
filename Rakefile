@@ -1,4 +1,4 @@
-require './model'
+require_relative 'lib/model'
 
 include ActiveRecord
 

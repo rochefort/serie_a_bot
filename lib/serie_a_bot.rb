@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
-require './model'
 require 'rss'
-
 require 'httparty'
 require 'json'
 require 'sanitize'
 require 'twitter'
+
+require 'model'
 
 class SerieABot
   DEBUG = false
