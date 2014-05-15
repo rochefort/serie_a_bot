@@ -1,2 +1,7 @@
-adapter: sqlite3
-database: db/serie_a_bot.db
+test:
+  adapter: sqlite3
+  database: db/serie_a_bot_test.db
+
+production:
+  adapter: sqlite3
+  database: db/serie_a_bot.db

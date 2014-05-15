@@ -19,5 +19,5 @@ _yardoc
 doc/
 
 settings.yaml
-serie_a_bot.db
+db/*.db
 whitelist.txt

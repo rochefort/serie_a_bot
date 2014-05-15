@@ -1,5 +1,5 @@
+require_relative 'config/boot.rb'
 require_relative 'lib/model'
-
 include ActiveRecord
 
 require 'rspec/core/rake_task'

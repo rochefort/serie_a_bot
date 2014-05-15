@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+require_relative '../config/boot.rb'
+
 require 'rss'
 require 'httparty'
 require 'json'
