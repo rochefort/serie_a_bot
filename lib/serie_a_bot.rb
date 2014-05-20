@@ -7,19 +7,20 @@ require 'json'
 require 'sanitize'
 require 'twitter'
 
-require 'model'
+require_relative 'model'
 
 class SerieABot
-  DEBUG = false
 
   def initialize
     settings = YAML.load_file('config/settings.yml')
-    Twitter::REST::Client.new do |c|
+    @client = Twitter::REST::Client.new do |c|
       c.consumer_key        = settings['twitter']['consumer_key']
       c.consumer_secret     = settings['twitter']['consumer_secret']
       c.access_token        = settings['twitter']['access_token']
       c.access_token_secret = settings['twitter']['access_token_secret']
     end
+
+    @debug = true if ENV['DEBUG']
   end
 
   def crawl
@@ -37,9 +38,9 @@ class SerieABot
           st = RssItem.connection.raw_connection.prepare(sql)
           st.execute(title, pub_date, description, item.link, title, pub_date, site.id)
           st.close
-          puts title if DEBUG
+          puts title if @debug
         else
-          if DEBUG
+          if @debug
             puts "----"
             puts title
             puts description
@@ -52,14 +53,14 @@ class SerieABot
   def tweet
     RssItem.where(tweeted_date: nil).order('pub_date, title').limit(1).first.tap do |r|
       begin
-        Twitter.update("[#{r.rss_site.title}]#{r.title}\n#{r.description}\n#{url_shortner(r.link)}")
+        @client.update("[#{r.rss_site.title}]#{r.title}\n#{r.description}\n#{url_shortner(r.link)}")
         r.update_attributes(tweeted_date: ymdhms(Time.now), title: r.title, pub_date: r.pub_date)
       rescue Twitter::Error::Forbidden => e
         # Tweet二重登録時には、DBの更新だけ行う
         r.update_attributes(tweeted_date: ymdhms(Time.now), title: r.title, pub_date: r.pub_date)
       rescue => e
         # do nothing
-        p e if DEBUG
+        p e if @debug
       end
     end
   end
