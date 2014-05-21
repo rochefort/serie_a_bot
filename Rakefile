@@ -36,8 +36,8 @@ namespace :db do
   desc 'マスタ初期化（RSSサイトを登録します）'
   task :seed do
     RssSite.destroy_all
-    RssSite.create!(title: 'Goal,com',   url: 'http://www.goal.com/jp/feeds/news?fmt=rss&ICID=OP')
-    RssSite.create!(title: 'SoccerKing', url: 'http://www.soccer-king.jp/RSS.rdf')
+    RssSite.create!(id: 1, title: 'Goal,com',   url: 'http://www.goal.com/jp/feeds/news?fmt=rss&ICID=OP')
+    RssSite.create!(id: 2, title: 'SoccerKing', url: 'http://www.soccer-king.jp/RSS.rdf')
   end
 end
 
