@@ -39,13 +39,15 @@ class SerieABot
             st = RssItem.connection.raw_connection.prepare(sql)
             st.execute(title, pub_date, description, item.link, title, pub_date, site.id)
             st.close
-            puts title if @debug
-          else
-            if @debug
-              puts "----"
-              puts title
-              puts description
-            end
+          end
+
+          if @debug
+            header = "---- #{site.title}"
+            header << ' ** seriea **' if is_serie_a
+            puts header
+            puts title
+            puts
+            # puts description
           end
         end
       end
