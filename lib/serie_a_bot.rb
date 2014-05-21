@@ -2,6 +2,7 @@
 require_relative '../config/boot'
 
 require 'rss'
+require 'active_support/core_ext/string/filters'
 require 'httparty'
 require 'json'
 require 'sanitize'
@@ -10,6 +11,7 @@ require 'twitter'
 require_relative 'model'
 
 class SerieABot
+  MAX_TWEET_SIZE = 140
 
   def initialize
     settings = YAML.load_file('config/settings.yml')
@@ -35,7 +37,8 @@ class SerieABot
           title = item.title
           pub_date = ymdhms(item.date)
           description = Sanitize.clean(item.description).strip
-          if about_serie_a?(title, description)
+          is_serie_a = about_serie_a?(title, description)
+          if is_serie_a
             st = RssItem.connection.raw_connection.prepare(sql)
             st.execute(title, pub_date, description, item.link, title, pub_date, site.id)
             st.close
@@ -57,7 +60,7 @@ class SerieABot
   def tweet
     RssItem.where(tweeted_date: nil).order('pub_date, title').limit(1).first.tap do |r|
       begin
-        @client.update("[#{r.rss_site.title}]#{r.title}\n#{r.description}\n#{url_shortner(r.link)}")
+        @client.update(generate_tweet(r))
         r.update_attributes(tweeted_date: ymdhms(Time.now), title: r.title, pub_date: r.pub_date)
       rescue Twitter::Error::Forbidden => e
         # Tweet二重登録時には、DBの更新だけ行う
@@ -70,6 +73,17 @@ class SerieABot
   end
 
   private
+    def generate_tweet(rss_item)
+      r = rss_item
+      title = "[#{r.rss_site.title}]#{r.title}"
+      link  = "#{url_shortner(r.link)}"
+      linefeeds_number = 2
+      desc_size = MAX_TWEET_SIZE - title.size - link.size - linefeeds_number
+      desc = "#{r.description}\n".truncate(desc_size)
+
+      "#{title}\n#{desc}\n#{link}"
+    end
+
     def ymdhms(time)
       time.strftime("%Y-%m-%d %H:%M:%S")
     end
