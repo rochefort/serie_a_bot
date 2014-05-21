@@ -24,26 +24,28 @@ class SerieABot
   end
 
   def crawl
-    site = RssSite.first
-    rss = RSS::Parser.parse(site.url)
     sql = 'REPLACE INTO rss_items(title, pub_date, description, link, tweeted_date, rss_site_id) ' +
           'VALUES(?, ?, ?, ?, (SELECT tweeted_date FROM rss_items WHERE title = ? AND pub_date = ?), ?)'
 
-    RssItem.transaction do
-      rss.items.each do |item|
-        title = item.title
-        pub_date = ymdhms(item.date)
-        description = Sanitize.clean(item.description).strip
-        if about_serie_a?(title, description)
-          st = RssItem.connection.raw_connection.prepare(sql)
-          st.execute(title, pub_date, description, item.link, title, pub_date, site.id)
-          st.close
-          puts title if @debug
-        else
-          if @debug
-            puts "----"
-            puts title
-            puts description
+    RssSite.all.each do |site|
+      # SoccorKing の RSSがinvalidであるため、validationなしでparseを行う
+      rss = RSS::Parser.parse(site.url, false)
+      RssItem.transaction do
+        rss.items.each do |item|
+          title = item.title
+          pub_date = ymdhms(item.date)
+          description = Sanitize.clean(item.description).strip
+          if about_serie_a?(title, description)
+            st = RssItem.connection.raw_connection.prepare(sql)
+            st.execute(title, pub_date, description, item.link, title, pub_date, site.id)
+            st.close
+            puts title if @debug
+          else
+            if @debug
+              puts "----"
+              puts title
+              puts description
+            end
           end
         end
       end
