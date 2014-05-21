@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-require_relative '../config/boot.rb'
+require_relative '../config/boot'
 
 require 'rss'
 require 'httparty'
