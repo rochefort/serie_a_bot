@@ -36,7 +36,7 @@ class SerieABot
         rss.items.each do |item|
           title = item.title
           pub_date = ymdhms(item.date)
-          description = Sanitize.clean(item.description).strip
+          description = Sanitize.clean(item.description).strip.gsub(/\A　*/, '')
           is_serie_a = about_serie_a?(title, description)
           if is_serie_a
             st = RssItem.connection.raw_connection.prepare(sql)
