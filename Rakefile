@@ -37,7 +37,7 @@ namespace :db do
   task :seed do
     RssSite.destroy_all
     RssSite.create!(title: 'Goal,com',   url: 'http://www.goal.com/jp/feeds/news?fmt=rss&ICID=OP')
-    RssSite.create!(title: 'SoccorKing', url: 'http://www.soccer-king.jp/RSS.rdf')
+    RssSite.create!(title: 'SoccerKing', url: 'http://www.soccer-king.jp/RSS.rdf')
   end
 end
 
