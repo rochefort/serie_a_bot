@@ -12,6 +12,12 @@ require_relative 'model'
 
 class SerieABot
   MAX_TWEET_SIZE = 140
+  TWEET_URL_BUFFER_SIZE = 4
+  # よくわからんがurl形式だと 2byte余分にカウントされているみたい。
+  # e.g.
+  # http://goo.gl/kwtpSZ
+  # => 20charsだが 22としてカウントされてしまう。
+  # そのため、バッファ用のカウントを2つ余分にみて4としています。
 
   def initialize
     settings = YAML.load_file('config/settings.yml')
@@ -78,7 +84,7 @@ class SerieABot
       title = "[#{r.rss_site.title}]#{r.title}"
       link  = "#{url_shortner(r.link)}"
       linefeeds_number = 2
-      desc_size = MAX_TWEET_SIZE - title.size - link.size - linefeeds_number
+      desc_size = MAX_TWEET_SIZE - TWEET_URL_BUFFER_SIZE- title.size - link.size - linefeeds_number
       desc = "#{r.description}\n".truncate(desc_size)
 
       "#{title}\n#{desc}\n#{link}"
