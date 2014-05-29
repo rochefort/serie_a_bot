@@ -20,7 +20,7 @@ class SerieABot
   # そのため、バッファ用のカウントを2つ余分にみて4としています。
 
   def initialize
-    settings = YAML.load_file('config/settings.yml')
+    settings = YAML.load_file(File.join(PROJECT_ROOT, 'config/settings.yml'))
     @client = Twitter::REST::Client.new do |c|
       c.consumer_key        = settings['twitter']['consumer_key']
       c.consumer_secret     = settings['twitter']['consumer_secret']
