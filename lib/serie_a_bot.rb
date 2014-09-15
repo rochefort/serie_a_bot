@@ -79,40 +79,41 @@ class SerieABot
   end
 
   private
-    def generate_tweet(rss_item)
-      r = rss_item
-      title = "[#{r.rss_site.title}]#{r.title}"
-      link  = "#{url_shortner(r.link)}"
-      linefeeds_number = 2
-      desc_size = MAX_TWEET_SIZE - TWEET_URL_BUFFER_SIZE- title.size - link.size - linefeeds_number
-      desc = "#{r.description}\n".truncate(desc_size)
 
-      "#{title}\n#{desc}\n#{link}"
+  def generate_tweet(rss_item)
+    r = rss_item
+    title = "[#{r.rss_site.title}]#{r.title}"
+    link  = "#{url_shortner(r.link)}"
+    linefeeds_number = 2
+    desc_size = MAX_TWEET_SIZE - TWEET_URL_BUFFER_SIZE - title.size - link.size - linefeeds_number
+    desc = "#{r.description}\n".truncate(desc_size)
+
+    "#{title}\n#{desc}\n#{link}"
+  end
+
+  def ymdhms(time)
+    time.strftime('%Y-%m-%d %H:%M:%S')
+  end
+
+  def about_serie_a?(*words)
+    File.open('config/whitelist.txt').readlines.map(&:strip).any? do |keyword|
+      words.join.include?(keyword)
     end
+  end
 
-    def ymdhms(time)
-      time.strftime("%Y-%m-%d %H:%M:%S")
-    end
+  # Google API Shortner response:
+  # {
+  #  "kind": "urlshortener#url",
+  #  "id": "http://goo.gl/CfPqZs",
+  #  "longUrl": "http://rochefort.hatenablog.com/"
+  # }
+  def url_shortner(url)
+    res = HTTParty.post('https://www.googleapis.com/urlshortener/v1/url',
+      body: { longUrl: url }.to_json,
+      headers: { 'Content-Type' => 'application/json' })
 
-    def about_serie_a?(*words)
-      File.open('config/whitelist.txt').readlines.map(&:strip).any? do |keyword|
-        words.join.include?(keyword)
-      end
-    end
-
-    # Google API Shortner response:
-    # {
-    #  "kind": "urlshortener#url",
-    #  "id": "http://goo.gl/CfPqZs",
-    #  "longUrl": "http://rochefort.hatenablog.com/"
-    # }
-    def url_shortner(url)
-      res = HTTParty.post('https://www.googleapis.com/urlshortener/v1/url',
-        :body => { :longUrl => url }.to_json,
-        :headers => { 'Content-Type' => 'application/json' } )
-
-      (res.code == 200) ? res["id"] : url
-    end
+    (res.code == 200) ? res["id"] : url
+  end
 end
 
 if __FILE__ == $0
