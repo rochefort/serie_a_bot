@@ -63,7 +63,7 @@ class SerieABot
     end
   end
 
-  def tweet
+  def tweet_rss
     RssItem.where(tweeted_date: nil).order('pub_date, title').limit(1).first.tap do |r|
       begin
         @client.update(generate_tweet(r))
@@ -76,6 +76,12 @@ class SerieABot
         p e if @debug
       end
     end
+  end
+  
+  def tweet(msg)
+    @client.update(msg)
+  rescue => e
+    p e if @debug
   end
 
   private
@@ -119,5 +125,5 @@ end
 if __FILE__ == $0
   s = SerieABot.new
   s.crawl
-  # s.tweet
+  # s.tweet_rss
 end

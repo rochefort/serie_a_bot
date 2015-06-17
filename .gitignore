@@ -21,3 +21,4 @@ doc/
 settings.yml
 db/*.db
 whitelist.txt
+regular_msg.txt
