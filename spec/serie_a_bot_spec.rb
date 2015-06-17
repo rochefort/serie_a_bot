@@ -2,15 +2,14 @@ require 'spec_helper'
 require 'serie_a_bot'
 
 describe 'SerieABot' do
-
   before do
     @settings = { 'twitter' => {
       'consumer_key'        => 'consumer_key',
       'consumer_secret'     => 'consumer_secret',
       'access_token'        => 'access_token',
       'access_token_secret' => 'access_token_secret'
-    }}
-    YAML.stub(:load_file).and_return(@settings)
+    } }
+    allow(YAML).to receive(:load_file).and_return(@settings)
     @bot = SerieABot.new
   end
 
