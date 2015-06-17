@@ -112,7 +112,7 @@ class SerieABot
       body: { longUrl: url }.to_json,
       headers: { 'Content-Type' => 'application/json' })
 
-    (res.code == 200) ? res["id"] : url
+    (res.code == 200) ? res['id'] : url
   end
 end
 
