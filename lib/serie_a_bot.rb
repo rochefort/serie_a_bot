@@ -27,7 +27,8 @@ class SerieABot
       c.access_token        = settings['twitter']['access_token']
       c.access_token_secret = settings['twitter']['access_token_secret']
     end
-
+    @whitelist = File.open('config/whitelist.txt').readlines.map(&:strip)
+    @whitelist.delete("")
     @debug = true if ENV['DEBUG']
   end
 
@@ -77,7 +78,7 @@ class SerieABot
       end
     end
   end
-  
+
   def tweet(msg)
     @client.update(msg)
   rescue => e
@@ -102,7 +103,7 @@ class SerieABot
   end
 
   def about_serie_a?(*words)
-    File.open('config/whitelist.txt').readlines.map(&:strip).any? do |keyword|
+    @whitelist.any? do |keyword|
       words.join.include?(keyword)
     end
   end
