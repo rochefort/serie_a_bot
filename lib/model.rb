@@ -1,10 +1,10 @@
-require 'active_record'
+require "active_record"
 
 class BaseModel < ActiveRecord::Base
   self.abstract_class = true
-  config = YAML.load_file(File.join(PROJECT_ROOT, 'config/database.yml'))
+  config = YAML.load_file(File.join(PROJECT_ROOT, "config/database.yml"))
   ActiveRecord::Base.configurations = config
-  ActiveRecord::Base.establish_connection(ENV['RUBY_ENV'].to_sym)
+  ActiveRecord::Base.establish_connection(ENV["RUBY_ENV"].to_sym)
 end
 
 class RssItem < BaseModel
