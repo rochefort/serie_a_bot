@@ -1,14 +1,14 @@
 #!/usr/bin/env ruby
 require_relative "../config/boot"
 
+require "json"
 require "rss"
 require "active_support/core_ext/string/filters"
-require "httparty"
-require "json"
 require "sanitize"
 require "twitter"
 
 require_relative "model"
+require_relative "google_shortner"
 
 class SerieABot
   MAX_TWEET_SIZE = 140
@@ -90,7 +90,7 @@ class SerieABot
     def generate_tweet(rss_item)
       r = rss_item
       title = "[#{r.rss_site.title}]#{r.title}"
-      link  = "#{url_shortner(r.link)}"
+      link  = "#{GoogleShortner.shorten(r.link)}"
       linefeeds_number = 2
       desc_size = MAX_TWEET_SIZE - TWEET_URL_BUFFER_SIZE - title.size - link.size - linefeeds_number
       desc = "#{r.description}\n".truncate(desc_size)
@@ -106,20 +106,6 @@ class SerieABot
       @whitelist.any? do |keyword|
         words.join.include?(keyword)
       end
-    end
-
-    # Google API Shortner response:
-    # {
-    #  "kind": "urlshortener#url",
-    #  "id": "http://goo.gl/CfPqZs",
-    #  "longUrl": "http://rochefort.hatenablog.com/"
-    # }
-    def url_shortner(url)
-      res = HTTParty.post("https://www.googleapis.com/urlshortener/v1/url",
-        body: { longUrl: url }.to_json,
-        headers: { "Content-Type" => "application/json" })
-
-      (res.code == 200) ? res["id"] : url
     end
 end
 
