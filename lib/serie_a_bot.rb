@@ -29,7 +29,7 @@ class SerieABot
     end
     @whitelist = File.open("config/whitelist.txt").readlines.map(&:strip)
     @whitelist.delete("")
-    @debug = true if ENV["DEBUG"]
+    @debug = !ENV["DEBUG"].nil?
   end
 
   def crawl
