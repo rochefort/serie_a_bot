@@ -108,9 +108,3 @@ class SerieABot
       end
     end
 end
-
-if __FILE__ == $0
-  s = SerieABot.new
-  s.crawl
-  # s.tweet_rss
-end
