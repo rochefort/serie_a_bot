@@ -7,6 +7,12 @@ RSpec::Core::RakeTask.new(:spec)
 
 task default: :spec
 
+desc "各種情報を表示"
+task :stats do
+  puts "RssItem件数: #{RssItem.count}"
+  puts "未tweet件数: #{RssItem.where(tweeted_date: nil).size}"
+end
+
 namespace :db do
   desc "データベース、テーブルを作成します"
   task :create do
