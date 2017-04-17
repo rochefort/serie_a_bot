@@ -1,11 +1,18 @@
+require "rake/testtask"
 require_relative "config/boot"
 require_relative "lib/model"
 include ActiveRecord
 
-require "rspec/core/rake_task"
-RSpec::Core::RakeTask.new(:spec)
+task default: :test
 
-task default: :spec
+desc "Run tests"
+ENV["TESTOPTS"] = "-v" unless ENV["TESTOPTS"]
+Rake::TestTask.new do |t|
+  t.libs << "test"
+  t.test_files = Dir["test/**/test_*.rb"]
+  t.verbose = true
+  t.warning = false
+end
 
 desc "各種情報を表示"
 task :stats do
