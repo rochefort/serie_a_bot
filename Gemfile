@@ -8,6 +8,10 @@ gem "sanitize",      "~>2.1.0"
 gem "sqlite3",       "~>1.3.9"
 gem "twitter",       "~>5.9.0"
 
+group :development do
+  gem "observr"
+end
+
 group :test do
   gem "test-unit"
 end
