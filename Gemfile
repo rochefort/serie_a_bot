@@ -13,6 +13,7 @@ group :development do
 end
 
 group :test do
+  gem "simplecov"
   gem "test-unit"
   gem "test-unit-rr"
   gem "webmock"

@@ -7,6 +7,7 @@ task default: :test
 
 desc "Run tests"
 ENV["TESTOPTS"] = "-v" unless ENV["TESTOPTS"]
+ENV["COVERAGE"] = "true"
 Rake::TestTask.new do |t|
   t.libs << "test"
   t.test_files = Dir["test/**/test_*.rb"]
