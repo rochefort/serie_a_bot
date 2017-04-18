@@ -1,4 +1,3 @@
-require "test/unit"
 require_relative "helper"
 require "serie_a_bot"
 

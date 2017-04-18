@@ -1,20 +1,38 @@
 require "json"
-require "httparty"
+require "httpclient"
 
 class GoogleShortner
-  API_URL = "https://www.googleapis.com/urlshortener/v1/url"
+  API_BASE_URL = "https://www.googleapis.com/urlshortener/v1/url"
   # Google API Shortner
-  # response:
+  # Response:
   # {
   #  "kind": "urlshortener#url",
   #  "id": "http://goo.gl/CfPqZs",
   #  "longUrl": "http://rochefort.hatenablog.com/"
   # }
-  def self.shorten(url)
-    res = HTTParty.post(API_URL,
-      body: { longUrl: url }.to_json,
-      headers: { "Content-Type" => "application/json" })
+  #
+  # Error Response:
+  # {"error"=>
+  #   {"errors"=>
+  #     [{"domain"=>"usageLimits",
+  #       "reason"=>"dailyLimitExceededUnreg",
+  #       "message"=>
+  #       "Daily Limit for Unauthenticated Use Exceeded. Continued use requires signup.",
+  #       "extendedHelp"=>"https://code.google.com/apis/console"}],
+  #     "code"=>403,
+  #     "message"=>
+  #     "Daily Limit for Unauthenticated Use Exceeded. Continued use requires signup."
+  #   }
+  # }
 
-    (res.code == 200) ? res["id"] : url
+  def self.shorten(url)
+    client = HTTPClient.new
+    res = client.post(API_BASE_URL,
+      body: { longUrl: url }.to_json,
+      headers: { "Content-Type" => "application/json" }
+    )
+    body = JSON.parse(res.body)
+    return url unless res.code == 200
+    body["id"] || url
   end
 end
