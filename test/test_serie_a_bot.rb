@@ -14,10 +14,15 @@ class TestSerieABot < Test::Unit::TestCase
   end
 
   sub_test_case "about_serie_a?" do
-    data("empty" => [false, "インテル"])
+    data(
+      "incorrect singlebyte word" => [true, "inter", ["インテル", "イタリア", "inter"]],
+      "incorrect multibytes word" => [true, "インテル悲願のスクデッド", ["インテル", "イタリア"]],
+      "whitelist is empty" => [false, "インテル", []],
+      "not found" =>          [false, "インテル", ["フロンターレ", "長友"]]
+    )
     def test_whitelist_is_empty(data)
-      expected, target = data
-      @bot.instance_variable_set(:@whitelist, [])
+      expected, target, whitelist = data
+      @bot.instance_variable_set(:@whitelist, whitelist)
       assert_equal expected, @bot.send(:about_serie_a?, target)
     end
   end
