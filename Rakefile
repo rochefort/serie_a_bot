@@ -15,6 +15,11 @@ Rake::TestTask.new do |t|
   t.warning = false
 end
 
+desc "Browse coverage"
+task coverage: [:test] do
+  sh("open ./coverage/index.html")
+end
+
 desc "各種情報を表示"
 task :stats do
   puts "RssItem件数: #{RssItem.count}"
