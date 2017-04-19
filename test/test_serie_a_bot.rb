@@ -20,7 +20,7 @@ class TestSerieABot < Test::Unit::TestCase
       "whitelist is empty" => [false, "インテル", []],
       "not found" =>          [false, "インテル", ["フロンターレ", "長友"]]
     )
-    def test_whitelist_is_empty(data)
+    def test_about_serie_a(data)
       expected, target, whitelist = data
       @bot.instance_variable_set(:@whitelist, whitelist)
       assert_equal expected, @bot.send(:about_serie_a?, target)
