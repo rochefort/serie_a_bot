@@ -47,6 +47,20 @@ namespace :db do
     File.unlink(ActiveRecord::Base.connection_config[:database])
   end
 
+  desc "schema情報を表示します"
+  task :schema do
+    tables = ActiveRecord::Base.connection.data_sources
+    puts "** tables **"
+    puts tables
+    puts "-" * 30
+    puts "** schema **"
+    tables.each do |table|
+      puts table
+      model = table.classify.safe_constantize
+      model.columns_hash.each { |k, v| puts "  #{k} (#{v.type})" }
+    end
+  end
+
   desc "マスタ初期化（RSSサイトを登録します）"
   task :seed do
     RssSite.destroy_all
