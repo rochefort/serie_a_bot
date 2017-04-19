@@ -3,7 +3,6 @@ require "httpclient"
 
 class GoogleShortner
   API_BASE_URL = "https://www.googleapis.com/urlshortener/v1/url"
-  # Google API Shortner
   # Response:
   # {
   #  "kind": "urlshortener#url",
