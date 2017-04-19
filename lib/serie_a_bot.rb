@@ -12,12 +12,9 @@ require_relative "google_shortner"
 
 class SerieABot
   MAX_TWEET_SIZE = 140
-  TWEET_URL_BUFFER_SIZE = 4
-  # よくわからんがurl形式だと 2byte余分にカウントされているみたい。
-  # e.g.
-  # http://goo.gl/kwtpSZ
-  # => 20charsだが 22としてカウントされてしまう。
-  # そのため、バッファ用のカウントを2つ余分にみて4としています。
+  # TWEET_URL_BUFFER_SIZE = 4
+  # url形式だと23bytesとして扱われる。
+  TWEET_URL_SIZE = 23
 
   def initialize
     settings = YAML.load_file(File.join(PROJECT_ROOT, "config/settings.yml"))
@@ -91,10 +88,10 @@ class SerieABot
       r = rss_item
       title = "[#{r.rss_site.title}]#{r.title}"
       link  = "#{GoogleShortner.shorten(r.link)}"
-      linefeeds_number = 2
-      desc_size = MAX_TWEET_SIZE - TWEET_URL_BUFFER_SIZE - title.size - link.size - linefeeds_number
+      # title, desc, link の改行数
+      line_feed_number = 2
+      desc_size = MAX_TWEET_SIZE - TWEET_URL_SIZE - title.size - line_feed_number
       desc = "#{r.description}\n".truncate(desc_size)
-
       "#{title}\n#{desc}\n#{link}"
     end
 
