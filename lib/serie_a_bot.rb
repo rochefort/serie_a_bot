@@ -12,7 +12,6 @@ require_relative "google_shortner"
 
 class SerieABot
   MAX_TWEET_SIZE = 140
-  # TWEET_URL_BUFFER_SIZE = 4
   # url形式だと23bytesとして扱われる。
   TWEET_URL_SIZE = 23
 
